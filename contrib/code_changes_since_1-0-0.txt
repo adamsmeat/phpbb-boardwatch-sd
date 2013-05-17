@@ -1,0 +1,351 @@
+Below I show the code changes from version 1.0.0 to 1.0.4 (the current version).
+If you don't already have this mod installed, install version 1.0.4 and don't worry about this file):
+
+
+Changes from 1.0.0 to 1.0.1:
+
+-	change '0.0.1' to '1.0.1' in includes/ucp/info/ucp_boardwatch.php
+
+-	change the phrase "separately subscribed to a another topic or forum" or "separately subscribed to a topic or forum" to "separately subscribed to another topic or forum" in the following files:
+	language/en/email/boardwatch_forum_notify_but.txt
+	language/en/email/boardwatch_newtopic_notify_but.txt
+	language/en/email/boardwatch_post_but.txt
+	language/en/email/boardwatch_reply_but.txt
+	language/en/email/boardwatch_topic_notify_but.txt
+
+-	delete the sentence that begins with "You will not receive another topic reply notification..." in language/en/email/boardwatch_topic_notify.txt
+
+
+*****************************************************************************
+
+
+Changes from 1.0.1 to 1.0.1a
+
+-	change '1.0.1' to '1.0.1a' in includes/ucp/info/ucp_boardwatch.php
+
+-	make this file edit:
+
+OPEN
+includes/acp/acp_users.php, change:
+
+FIND
+				boardwatch_draw_acp_prefs(&$data, $user_row);
+
+REPLACE WITH
+				boardwatch_draw_acp_prefs($data, $user_row);
+
+
+*****************************************************************************
+
+
+Changes from 1.0.1a to 1.0.1b
+
+-	change '1.0.1a' to '1.0.1b' in includes/ucp/info/ucp_boardwatch.php
+
+-	make this file edit:
+
+OPEN
+includes/functions_posting.php
+
+FIND
+				AND (fw.notify_status = 0 OR u.user_boardwatchf = ' . BOARDWATCH_YES . ')
+
+REPLACE WITH
+				AND (fw.notify_status = 0 OR u.user_boardwatchf = " . BOARDWATCH_YES . ")
+
+
+*****************************************************************************
+
+
+Changes from 1.0.1b to 1.0.1c
+
+-	change '1.0.1b' to '1.0.1c' in includes/ucp/info/ucp_boardwatch.php
+
+-	make this file edit:
+
+OPEN
+includes/functions_posting.php
+
+FIND
+				// start mod boardwatch (and end mod too)...added the next line
+				$email_template = ($addr['yes_but']) ? $email_template . '_but' : $email_template;
+
+				$messenger->template($email_template, $addr['lang']);
+
+REPLACE WITH
+				// start mod boardwatch (and end mod too)...added the next line and in the one after, changed
+				// $email_template to $boardwatch_template
+				$boardwatch_template = ($addr['yes_but']) ? $email_template . '_but' : $email_template;
+
+				$messenger->template($boardwatch_template, $addr['lang']);
+
+
+*****************************************************************************
+
+
+Changes from 1.0.1c to 1.0.1d
+
+-	change '1.0.1c' to '1.0.1d' in includes/ucp/info/ucp_boardwatch.php
+
+-	make this file edit
+
+OPEN
+includes/ucp/ucp_boardwatch.php, do this:
+
+FIND
+		// is the user submitting his or her selections?
+		if (isset($_POST['submit']))
+		{
+			// get the selections
+			$boardwatchb_selection	= request_var('boardwatch', 0);
+			$boardwatchf_selection	= request_var('forumwatch', 0);
+			$boardwatcht_selection	= request_var('topicwatch', 0);
+
+			$sql_ary = array(
+				'user_boardwatchb'		=> $boardwatchb_selection,
+				'user_boardwatchf'		=> $boardwatchf_selection,
+				'user_boardwatcht'		=> $boardwatcht_selection,
+				'user_notify_status'	=> 0
+			);
+
+			$sql = 'UPDATE ' . USERS_TABLE . '
+				SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+				WHERE user_id = ' . $user->data['user_id'];
+			$db->sql_query($sql);
+
+			meta_refresh(3, $this->u_action);
+			$message = $user->lang['PREFERENCES_UPDATED'] . '<br /><br />' . sprintf($user->lang['RETURN_UCP'], '<a href="' . $this->u_action . '">', '</a>');
+			trigger_error($message);
+		}
+
+		// get the current selections from the database to show as the default
+		$sql = 'SELECT user_boardwatchb, user_boardwatchf, user_boardwatcht
+			FROM ' . USERS_TABLE . '
+			WHERE user_id = ' . $user->data['user_id'];
+		$result = $db->sql_query($sql);
+		$row = $db->sql_fetchrow($result);
+		$db->sql_freeresult($result);
+
+REPLACE WITH
+		// get the current selections from the database to show as the default
+		$sql = 'SELECT user_boardwatchb, user_boardwatchf, user_boardwatcht
+			FROM ' . USERS_TABLE . '
+			WHERE user_id = ' . $user->data['user_id'];
+		$result = $db->sql_query($sql);
+		$row = $db->sql_fetchrow($result);
+		$db->sql_freeresult($result);
+
+		// is the user submitting his or her selections?
+		if (isset($_POST['submit']))
+		{
+			// get the selections
+			$boardwatchb_selection	= request_var('boardwatch', $row['user_boardwatchb']);
+			$boardwatchf_selection	= request_var('forumwatch', $row['user_boardwatchb']);
+			$boardwatcht_selection	= request_var('topicwatch', $row['user_boardwatchb']);
+
+			$sql_ary = array(
+				'user_boardwatchb'		=> $boardwatchb_selection,
+				'user_boardwatchf'		=> $boardwatchf_selection,
+				'user_boardwatcht'		=> $boardwatcht_selection,
+				'user_notify_status'	=> 0
+			);
+
+			$sql = 'UPDATE ' . USERS_TABLE . '
+				SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+				WHERE user_id = ' . $user->data['user_id'];
+			$db->sql_query($sql);
+
+			meta_refresh(3, $this->u_action);
+			$message = $user->lang['PREFERENCES_UPDATED'] . '<br /><br />' . sprintf($user->lang['RETURN_UCP'], '<a href="' . $this->u_action . '">', '</a>');
+			trigger_error($message);
+		}
+
+
+*****************************************************************************
+
+
+Changes from 1.0.1d to 1.0.1e
+
+-	change '1.0.1d' to '1.0.1e' in includes/ucp/info/ucp_boardwatch.php
+
+-	copy install_boardwatch.php and the umil folder into your root directory
+
+-	run a query like this for mysql (you may need to adapt it if you don't use mysql):
+	INSERT INTO phpbb_config (config_name, config_value, is_dynamic) VALUES ('boardwatch_version', '1.0.1e', 0);
+
+- 	make the following code changes:
+
+OPEN
+language/en/mods/info_ucp_boardwatch.php
+
+FIND
+	'INSTALL_BOARDWATCH'			=> 'Install boardwatch module, permissions and database fields',
+	'INSTALL_BOARDWATCH_CONFIRM'	=> 'Are you ready to install boardwatch module, permissions and database fields?',
+	'UPDATE_BOARDWATCH'				=> 'Update boardwatch to latest version',
+	'UPDATE_BOARDWATCH_CONFIRM'		=> 'Are you ready to update boardwatch to the latest version?',
+	'UNINSTALL_BOARDWATCH'			=> 'Uninstall boardwatch',
+	'UNINSTALL_BOARDWATCH_CONFIRM'	=> 'Are you ready to uninstall boardwatch module, permissions and database fields?',
+
+REPLACE WITH
+	'BOARDWATCH1'					=> 'Boardwatch installation script',
+	'INSTALL_BOARDWATCH1'			=> 'Install boardwatch module, permissions and database fields',
+	'INSTALL_BOARDWATCH1_CONFIRM'	=> 'Are you ready to install boardwatch module, permissions and database fields?',
+	'UPDATE_BOARDWATCH1'			=> 'Update boardwatch to latest version',
+	'UPDATE_BOARDWATCH1_CONFIRM'	=> 'Are you ready to update boardwatch to the latest version?',
+	'UNINSTALL_BOARDWATCH1'			=> 'Uninstall boardwatch',
+	'UNINSTALL_BOARDWATCH1_CONFIRM'	=> 'Are you ready to uninstall boardwatch module, permissions and database fields?',
+	
+	
+*****************************************************************************
+
+
+Changes from 1.0.1e to 1.0.2
+
+-	no change in mod, but includes newer version of umil folder and tested with phpbb3.0.6
+
+
+*****************************************************************************
+
+
+Changes from 1.0.2 to 1.0.3
+
+-	delete all javascript in styles/prosilver/templates/ucp_boardwatch.html
+
+-	no other changes other than those required to install into phpbb 3.0.8, and includes newer version of umil folder
+
+-	if you have installed version 1.0.2 of this mod on phpbb 3.0.7-PL1 and you want to use the updater to update
+	your phpbb installation to phpbb 3.0.8, follow the directions here:
+	http://www.phpbb.com/customise/db/mod/board_watch/support/installing_this_mod_on_phpbb3_3.0.8-t_87690
+
+****************************************************************************
+
+Changes from 1.0.3 to 1.0.4
+
+If you already have boardwatch 1.0.3 installed and are using the automatic updater to upgrade to phpbb3.0.11RC1, the automatic updater will show a conflict in includes/functions_posting.php.  You should select first option - which is 'Merge modifications (removes modified code within conflicting block)' and complete the update.  Once you are done, you should make the following changes:
+
+[code]
+OPEN
+includes/functions_posting.php
+
+FIND
+			AND w.notify_status = ' . NOTIFY_YES . '
+
+REPLACE WITH
+			AND (w.notify_status = ' . NOTIFY_YES . ' OR u.user_boardwatch' . (($topic_notification) ? 't' : 'f') . ' = ' . BOARDWATCH_YES . ')
+
+FIND
+		$sql = 'SELECT u.user_id, u.username, u.user_email, u.user_lang, u.user_notify_type, u.user_jabber
+
+REPLACE WITH
+		$sql = 'SELECT u.user_id, u.username, u.user_email, u.user_lang, u.user_notify_type, u.user_jabber, u.user_boardwatchf
+
+FIND
+				AND fw.notify_status = ' . NOTIFY_YES . '
+				
+REPLACE WITH
+				AND (fw.notify_status = ' . NOTIFY_YES . ' OR u.user_boardwatchf = ' . BOARDWATCH_YES . ')
+
+FIND
+			$msg_list_ary[$row['template']][$pos]['yes_but']= $row['yes_but'];
+
+REPLACE WITH
+			$msg_list_ary[$row['template']][$pos]['yes_but']= isset($row['yes_but']) ? $row['yes_but'] : false;
+
+Then, overwrite the following files with the current versions that come with boardwatch 1.0.4:
+includes/functions_boardwatch.php
+language/en/mods/info_ucp_boardwatch.php
+styles/prosilver/template/ucp_boardwatch.html
+includes/ucp/info/ucp_boardwatch.php
+install_boardwatch.php
+
+If you prefer, you can keep your old files and make the following additional changes beyond those listed above:
+OPEN
+includes/functions_boardwatch.php
+
+FIND
+			AND user_id NOT IN (' . $sql_ignore_users . ')
+
+REPLACE WITH
+			AND ' . $db->sql_in_set('user_id', $sql_ignore_users, true) . '
+
+FIND
+		$notify_rows[$row['user_id']] = array(
+
+REPLACE WITH
+		$notify_user_id = (int) $row['user_id'];
+		$notify_rows[$notify_user_id] = array(
+
+FIND
+		if ($row['user_boardwatchb'] == BOARDWATCH_YES_BUT)
+
+BEFORE, ADD
+		// make sure the subsequent topic and forum notices don't go out to people already receiving boardwatch notices
+		$sql_ignore_users[$notify_user_id] = $notify_user_id;
+
+FIND AND DELETE
+	// make sure the subsequent topic and forum notices don't go out to people already receiving boardwatch notices
+	if (sizeof($notify_rows))
+	{
+		$sql_ignore_users .= ', ' . implode(', ', array_keys($notify_rows));
+	}
+
+OPEN
+language/en/mods/info_ucp_boardwatch.php
+FIND
+// The following language definitions are used in the postnotices to groups mod.
+
+REPLACE WITH
+// The following language definitions are used in the boardwatch mod.
+
+OPEN
+styles/prosilver/template/ucp_boardwatch.html
+
+FIND
+<fieldset class="submit-buttons">
+	{S_HIDDEN_FIELDS}<input type="reset" value="{L_RESET}" name="reset" class="button2" />&nbsp;
+	<input type="submit" name="submit" value="{L_SUBMIT}" class="button1" />
+	{S_FORM_TOKEN}
+</fieldset>
+
+REPLACE WITH
+<!-- IF not S_NO_BOARDWATCH_OPTIONS -->
+	<fieldset class="submit-buttons">
+		{S_HIDDEN_FIELDS}<input type="reset" value="{L_RESET}" name="reset" class="button2" />&nbsp;
+		<input type="submit" name="submit" value="{L_SUBMIT}" class="button1" />
+		{S_FORM_TOKEN}
+	</fieldset>
+<!-- ENDIF -->
+
+OPEN
+includes/ucp/info/ucp_boardwatch.php
+
+FIND
+			'version'	=> '1.0.0e',
+
+REPLACE WITH
+			'version'	=> '1.0.4',
+
+FIND
+				'boardwatch'			=> array('title' => 'BOARDWATCH_EDIT_OPTIONS', 'auth' => 'acl_u_boardwatchb || acl_u_boardwatchf || acl_u_boardwatcht', 'cat' => ''),
+
+REPLACE WITH
+				'boardwatch'			=> array('title' => 'BOARDWATCH_EDIT_OPTIONS', 'auth' => '', 'cat' => ''),
+
+OPEN
+install_boardwatch.php
+
+FIND
+	// Version 1.0.3 (nothing new)
+	'1.0.3'	=> array(),
+
+AFTER, ADD
+	// Version 1.0.4
+	'1.0.4'	=> array(
+		// update module table so a user without permissions to change boardwatch settings can still see module with text saying they do not have permissions
+		'table_row_update' => array(
+			array('phpbb_modules',
+				array('module_basename'  => 'boardwatch'),
+				array('module_auth'  => '')
+			),
+		),
+	),
